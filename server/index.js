@@ -1,8 +1,8 @@
-import express from 'express'; import cors from 'cors'; import pg from 'pg'; import rateLimit from 'express-rate-limit';
+import express from 'express'; import cors from 'cors'; import pg from 'pg'; import rateLimit from 'express-rate-limit'; import crypto from 'node:crypto';
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const app = express();
 app.use(cors({ origin: process.env.CLIENT_ORIGIN?.split(',') || true }));
-app.use(express.json({ limit: '50kb' }));
+app.use(express.json({ limit: '100kb' }));
 app.use('/api', rateLimit({ windowMs: 60_000, limit: 60 }));
 
 await pool.query(`
@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS rsvps (
   attending BOOLEAN NOT NULL, guest_count INT NOT NULL DEFAULT 1,
   dietary TEXT, song TEXT, message TEXT, updated_at TIMESTAMPTZ DEFAULT now());
 ALTER TABLE rsvps ADD COLUMN IF NOT EXISTS email TEXT;
-ALTER TABLE rsvps ADD COLUMN IF NOT EXISTS phone TEXT;`);
+ALTER TABLE rsvps ADD COLUMN IF NOT EXISTS phone TEXT;
+CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value JSONB NOT NULL);`);
 
 const slugify = (n) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Math.random().toString(36).slice(2, 6);
 const clip = (v, n) => (v == null ? null : String(v).slice(0, n));
@@ -66,6 +67,40 @@ app.get('/api/wishes', async (_req, res) => {
 
 app.delete('/api/admin/guests/:slug', admin, async (req, res) => {
   await pool.query('DELETE FROM guests WHERE slug=$1', [req.params.slug]);
+  res.json({ ok: true });
+});
+
+// ---- editable invitation content (overrides client/src/config.js) ----
+app.get('/api/config', async (_req, res) => {
+  const { rows } = await pool.query("SELECT value FROM settings WHERE key='config'");
+  res.set('Cache-Control', 'no-store').json(rows[0]?.value || {});
+});
+
+app.put('/api/admin/config', admin, async (req, res) => {
+  const c = req.body.config;
+  if (!c || typeof c !== 'object' || Array.isArray(c)) return res.status(400).json({ error: 'Bad config' });
+  await pool.query(`INSERT INTO settings (key, value) VALUES ('config', $1) ON CONFLICT (key) DO UPDATE SET value=$1`, [JSON.stringify(c)]);
+  res.json({ ok: true });
+});
+
+app.delete('/api/admin/config', admin, async (_req, res) => {
+  await pool.query("DELETE FROM settings WHERE key='config'");
+  res.json({ ok: true });
+});
+
+// Signed upload to Cloudinary: the browser sends the file straight to Cloudinary, the secret never leaves the server.
+app.post('/api/admin/upload-signature', admin, (_req, res) => {
+  const { CLOUDINARY_CLOUD_NAME: cloudName, CLOUDINARY_API_KEY: apiKey, CLOUDINARY_API_SECRET: secret } = process.env;
+  if (!cloudName || !apiKey || !secret) return res.status(500).json({ error: 'Cloudinary is not set up on the server yet.' });
+  const timestamp = Math.floor(Date.now() / 1000), folder = 'wedding';
+  const signature = crypto.createHash('sha1').update(`folder=${folder}&timestamp=${timestamp}${secret}`).digest('hex');
+  res.json({ cloudName, apiKey, timestamp, folder, signature });
+});
+
+app.put('/api/admin/guests/:slug', admin, async (req, res) => {
+  const name = String(req.body.name || '').trim().slice(0, 100);
+  if (!name) return res.status(400).json({ error: 'Name is required' });
+  await pool.query('UPDATE guests SET name=$1, max_guests=$2 WHERE slug=$3', [name, Math.min(Math.max(parseInt(req.body.max_guests) || 1, 1), 20), req.params.slug]);
   res.json({ ok: true });
 });
 

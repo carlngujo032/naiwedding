@@ -1,5 +1,5 @@
-// EDIT THIS FILE with your real wedding details.
-export default {
+// Default wedding details. Once you save changes in /admin, those override these values.
+export const defaults = {
   partner1: 'Maria', partner2: 'Josh',
   tagline: 'are getting married and want you there',
   date: '2027-02-14T15:00:00+08:00',
@@ -26,3 +26,10 @@ export default {
   backgroundPhoto: '/photos/bg.jpg', // the picture behind the frosted-glass cards
   music: '/song.mp3' // optional: put an mp3 in client/public and set '/song.mp3'
 };
+
+const API = import.meta.env.VITE_API_URL || '';
+const cfg = structuredClone(defaults);
+export async function loadConfig() {
+  try { const r = await fetch(`${API}/api/config`); if (r.ok) Object.assign(cfg, await r.json()); } catch { /* keep defaults */ }
+}
+export default cfg;
