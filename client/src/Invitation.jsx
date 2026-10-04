@@ -51,6 +51,13 @@ function Rsvp({ slug, guest, rsvp }) {
 const Tel = ({ c }) => <a href={`tel:${c[1].replace(/\s/g, '')}`} className="whitespace-nowrap font-medium underline">{c[0]} {c[1]}</a>;
 
 const Sec = ({ id, title, children }) => <section id={id} className="scroll-mt-4 border-t border-ink/15 py-10"><h2 className="mb-4 text-3xl">{title}</h2>{children}</section>;
+const show = (id) => !cfg.hidden?.includes(id);
+const extra = (id) => (cfg.extra || []).map((x, i) => [x, i]).filter(([x]) => (x.after || 'faq') === id).map(([x, i]) => (
+  <Sec key={`x${i}`} id={`custom-${i}`} title={x.title}>
+    {x.photo && <img src={x.photo} alt="" loading="lazy" className="mx-auto mb-4 w-full rounded-md object-cover" />}
+    {(x.text || '').split('\n').filter(Boolean).map((t, j) => <p key={j} className="mx-auto mb-3 max-w-[38ch] leading-relaxed">{t}</p>)}
+    {x.buttonUrl && <a className="btn mt-2" href={x.buttonUrl} target="_blank" rel="noreferrer">{x.buttonLabel || 'Learn more'}</a>}
+  </Sec>));
 const NAV = [['details', FaLocationDot, 'Details'], ['story', FaBookOpen, 'Our story'], ['entourage', FaUsers, 'Entourage'], ['gallery', FaImages, 'Photos'], ['faq', FaCircleQuestion, 'FAQ'], ['rsvp', FaEnvelopeOpenText, 'RSVP']];
 
 export default function Invitation({ slug, guest, rsvp, audio }) {
@@ -77,7 +84,7 @@ export default function Invitation({ slug, guest, rsvp, audio }) {
       <div className="my-8 grid grid-cols-4 gap-2 border-y border-brass/60 py-4">
         {cd.map(([l, v]) => <div key={l}><b className="block font-serif text-3xl font-light">{String(v).padStart(2, '0')}</b><span className="text-xs opacity-70">{l}</span></div>)}
       </div>
-      <Sec id="details" title="Where and when">
+      {show('details') && <Sec id="details" title="Where and when">
         <p>{when.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} at <b>{cfg.venue}</b><br />{cfg.address}</p>
         <a className="btn mt-3" href={cfg.mapUrl} target="_blank" rel="noreferrer"><FaLocationDot />Open in Google Maps</a>
         <div className="flex flex-wrap justify-center">
@@ -85,34 +92,34 @@ export default function Invitation({ slug, guest, rsvp, audio }) {
           <button className="btn btn-ghost" onClick={downloadIcs}><FaApple />Apple / Outlook</button>
         </div>
         <ol className="m-0 mt-8 inline-block list-none border-l-2 border-sage p-0 text-left">{cfg.schedule.map(([t, e]) => <li key={t} className="py-1.5 pl-4"><b className="inline-block min-w-[5.5rem]">{t}</b>{e}</li>)}</ol>
-      </Sec>
-      <Sec id="dress" title="Dress code">
+      </Sec>}{extra('details')}
+      {show('dress') && <Sec id="dress" title="Dress code">
         <p className="mx-auto max-w-[34ch]">{cfg.dress.note}</p>
         <div className="mt-3 flex justify-center gap-5">{cfg.palette.map(([n, c]) => <div key={n} className="text-sm"><i className="mx-auto mb-1 block h-11 w-11 rounded-full border border-black/20" style={{ background: c }} />{n}</div>)}</div>
         <div className="mt-5 grid grid-cols-2 gap-3">{cfg.dress.photos.map(([l, src]) => <figure key={l} className="m-0"><img src={src} alt={l} loading="lazy" className="aspect-[3/4] w-full rounded-t-full object-cover" /><figcaption className="mt-2 text-sm">{l}</figcaption></figure>)}</div>
-      </Sec>
-      <Sec id="story" title="Our story">{cfg.story.map((t, i) => <p key={i} className="mx-auto mb-4 max-w-[34ch] font-serif text-lg leading-relaxed">{t}</p>)}</Sec>
-      <Sec id="entourage" title="Our wedding party">
+      </Sec>}{extra('dress')}
+      {show('story') && <Sec id="story" title="Our story">{cfg.story.map((t, i) => <p key={i} className="mx-auto mb-4 max-w-[34ch] font-serif text-lg leading-relaxed">{t}</p>)}</Sec>}{extra('story')}
+      {show('entourage') && <Sec id="entourage" title="Our wedding party">
         <div className="grid gap-6">{cfg.entourage.map(([role, names]) => (
           <div key={role}><h3 className="mb-1 font-serif text-lg italic text-brass">{role}</h3>{names.map((n, i) => <p key={i} className="m-0">{n}</p>)}</div>))}</div>
-      </Sec>
-      <Sec id="gallery" title="Photos">
+      </Sec>}{extra('entourage')}
+      {show('gallery') && <Sec id="gallery" title="Photos">
         <div className="grid grid-cols-2 gap-2">{cfg.gallery.map((src, i) => (
           <button key={src} onClick={() => setBig(src)} aria-label="View photo larger" className={`overflow-hidden rounded-md ${i === 0 ? 'col-span-2 aspect-[16/10]' : i % 3 === 1 ? 'row-span-2' : 'aspect-square'}`}><img src={src} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 hover:scale-105" /></button>
         ))}</div>
-      </Sec>
-      <Sec id="faq" title="Good to know"><div className="grid gap-2 text-left">{cfg.faq.map(([q, a]) => (
-        <details key={q} className="group rounded-md border border-ink/20 bg-white/40 px-4 py-3 backdrop-blur-sm"><summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-medium [&::-webkit-details-marker]:hidden">{q}<FaChevronDown className="shrink-0 transition-transform group-open:rotate-180" /></summary><p className="mb-0 mt-2 text-sm">{a}</p></details>))}</div></Sec>
+      </Sec>}{extra('gallery')}
+      {show('faq') && <Sec id="faq" title="Good to know"><div className="grid gap-2 text-left">{cfg.faq.map(([q, a]) => (
+        <details key={q} className="group rounded-md border border-ink/20 bg-white/40 px-4 py-3 backdrop-blur-sm"><summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-medium [&::-webkit-details-marker]:hidden">{q}<FaChevronDown className="shrink-0 transition-transform group-open:rotate-180" /></summary><p className="mb-0 mt-2 text-sm">{a}</p></details>))}</div></Sec>}{extra('faq')}
       <Sec id="rsvp" title="R.S.V.P.">
         <p className="font-serif text-lg italic">Répondez s'il vous plaît</p>
         {cfg.rsvpBy && <p className="mb-6 text-sm">Kindly reply by {new Date(cfg.rsvpBy + 'T00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>}
         <Rsvp slug={slug} guest={guest} rsvp={rsvp} />
         <p className="mx-auto mt-8 max-w-[38ch] text-sm leading-relaxed">Questions? Contact our wedding coordinator, <Tel c={cfg.contacts.coordinator} />, or reach us directly: {cfg.contacts.couple.map((c, i) => <span key={c[0]}>{i > 0 && ', '}<Tel c={c} /></span>)}.</p>
-      </Sec>
+      </Sec>{extra('rsvp')}
       {wishes.length > 0 && <Sec title="Words from guests"><div className="grid gap-3 text-left">{wishes.map((w, i) => <blockquote key={i} className="m-0 rounded-md border border-white/60 bg-white/50 p-4 backdrop-blur-sm"><p className="m-0">{w.message}</p><footer className="mt-1 text-sm text-brass">{w.name}</footer></blockquote>)}</div></Sec>}
       </div></div>
       <nav aria-label="Sections" className="fixed bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-1 rounded-full bg-ink/70 px-2 py-1.5 shadow-lg backdrop-blur-md">
-        {NAV.map(([id, Icon, label]) => <a key={id} href={`#${id}`} aria-label={label} className="grid h-10 w-10 place-items-center rounded-full text-paper hover:bg-white/15"><Icon /></a>)}
+        {NAV.filter(([id]) => id === 'rsvp' || show(id)).map(([id, Icon, label]) => <a key={id} href={`#${id}`} aria-label={label} className="grid h-10 w-10 place-items-center rounded-full text-paper hover:bg-white/15"><Icon /></a>)}
       </nav>
       {big && <div role="dialog" aria-label="Photo" className="fixed inset-0 z-50 grid place-items-center bg-black/85 p-4" onClick={() => setBig(null)}><img src={big} alt="" className="max-h-[85svh] max-w-full rounded" /><button aria-label="Close" className="absolute right-4 top-4 text-3xl text-paper"><FaXmark /></button></div>}
     </motion.main>

@@ -60,6 +60,25 @@ export default function AdminEditor({ headers }) {
 
   return (
     <div className="grid gap-4">
+      <Card title="Show or hide sections">
+        <div className="grid grid-cols-2 gap-2 text-sm">{[['details', 'Where and when'], ['dress', 'Dress code'], ['story', 'Our story'], ['entourage', 'Wedding party'], ['gallery', 'Photos'], ['faq', 'Questions and answers']].map(([id, l]) => (
+          <label key={id} className="flex items-center gap-2"><input type="checkbox" checked={!c.hidden.includes(id)} onChange={(e) => set('hidden', e.target.checked ? c.hidden.filter((h) => h !== id) : [...c.hidden, id])} />{l}</label>))}</div>
+      </Card>
+
+      <Card title="Your own sections">
+        <p className="text-sm opacity-70">Add anything else guests should see: gift ideas, accommodation, travel tips, a video link, a live stream.</p>
+        {c.extra.map((x, i) => { const up = (patch) => set('extra', c.extra.map((e, j) => (j === i ? { ...e, ...patch } : e)));
+          return (
+            <div key={i} className="grid gap-2 rounded-md border border-ink/15 p-3">
+              <div className="flex gap-2"><input className="field font-medium" placeholder="Section title" value={x.title} onChange={(e) => up({ title: e.target.value })} /><Del onClick={() => drop('extra', i)} /></div>
+              <textarea className="field" rows="3" placeholder="Text (a new line starts a new paragraph)" value={x.text} onChange={(e) => up({ text: e.target.value })} />
+              <Photo src={x.photo} onChange={(p) => up({ photo: p })} onRemove={x.photo ? () => up({ photo: '' }) : null} />
+              <div className="flex gap-2"><input className="field" placeholder="Button text (optional)" value={x.buttonLabel} onChange={(e) => up({ buttonLabel: e.target.value })} /><input className="field" placeholder="Button link https://…" value={x.buttonUrl} onChange={(e) => up({ buttonUrl: e.target.value.trim() })} /></div>
+              <label className={lab}>Show it after<select className="field" value={x.after} onChange={(e) => up({ after: e.target.value })}>{[['details', 'Where and when'], ['dress', 'Dress code'], ['story', 'Our story'], ['entourage', 'Wedding party'], ['gallery', 'Photos'], ['faq', 'Questions and answers'], ['rsvp', 'RSVP (very bottom)']].map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>
+            </div>); })}
+        <Add onClick={() => push('extra', { title: '', text: '', photo: '', buttonLabel: '', buttonUrl: '', after: 'faq' })}>Add a section</Add>
+      </Card>
+
       <Card title="Couple and event">
         <div className="grid grid-cols-2 gap-3">{text('partner1', 'Partner 1')}{text('partner2', 'Partner 2')}</div>
         {text('tagline', 'Tagline')}

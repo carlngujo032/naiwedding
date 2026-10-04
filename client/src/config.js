@@ -24,7 +24,9 @@ export const defaults = {
   ],
   contacts: { coordinator: ['Coordinator Name', '0900 000 0000'], couple: [['Maria', '0900 000 0001'], ['Josh', '0900 000 0002']] },
   backgroundPhoto: '/photos/bg.jpg', // the picture behind the frosted-glass cards
-  music: '/song.mp3' // optional: put an mp3 in client/public and set '/song.mp3'
+  music: '/song.mp3', // optional: put an mp3 in client/public and set '/song.mp3'
+  hidden: [], // built-in sections to hide: 'details','dress','story','entourage','gallery','faq'
+  extra: [] // your own sections added from /admin: { title, text, photo, buttonLabel, buttonUrl, after }
 };
 
 const API = import.meta.env.VITE_API_URL || '';
