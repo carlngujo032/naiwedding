@@ -84,6 +84,9 @@ export default function AdminEditor({ headers }) {
         {text('tagline', 'Tagline')}
         <label className={lab}>Date and time (Philippine time)<input className="field" type="datetime-local" value={(c.date || '').slice(0, 16)} onChange={(e) => e.target.value && set('date', e.target.value + ':00+08:00')} /></label>
         {text('venue', 'Venue')}{text('address', 'Address')}{text('mapUrl', 'Google Maps link')}
+        {text('tabTitle', 'Browser tab title')}
+        <div className="grid gap-1"><b className="text-sm">Browser tab icon (square image works best)</b>
+          <div className="flex items-center gap-3">{c.favicon && <img src={c.favicon} alt="" className="h-10 w-10 rounded" />}<div className="flex-1"><Photo src={c.favicon} onChange={(p) => set('favicon', p)} onRemove={c.favicon ? () => set('favicon', '') : null} /></div></div></div>
         <label className={lab}>RSVP deadline (clear it to hide)<input className="field" type="date" value={c.rsvpBy || ''} onChange={(e) => set('rsvpBy', e.target.value)} /></label>
       </Card>
 

@@ -25,6 +25,8 @@ export const defaults = {
   contacts: { coordinator: ['Coordinator Name', '0900 000 0000'], couple: [['Maria', '0900 000 0001'], ['Josh', '0900 000 0002']] },
   backgroundPhoto: '/photos/bg.jpg', // the picture behind the frosted-glass cards
   music: '/song.mp3', // optional: put an mp3 in client/public and set '/song.mp3'
+  favicon: '', // browser tab icon: leave empty to use /favicon.svg, or set from /admin
+  tabTitle: "You're invited", // text shown on the browser tab
   hidden: [], // built-in sections to hide: 'details','dress','story','entourage','gallery','faq'
   extra: [] // your own sections added from /admin: { title, text, photo, buttonLabel, buttonUrl, after }
 };
@@ -35,3 +37,7 @@ export async function loadConfig() {
   try { const r = await fetch(`${API}/api/config`); if (r.ok) Object.assign(cfg, await r.json()); } catch { /* keep defaults */ }
 }
 export default cfg;
+export function applyTab() {
+  if (cfg.tabTitle) document.title = cfg.tabTitle;
+  if (cfg.favicon) { let l = document.querySelector('link[rel="icon"]'); if (!l) { l = document.createElement('link'); l.rel = 'icon'; document.head.append(l); } l.removeAttribute('type'); l.href = cfg.favicon; }
+}
