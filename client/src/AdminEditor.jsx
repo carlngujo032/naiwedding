@@ -122,6 +122,7 @@ export default function AdminEditor({ headers }) {
 
       <Card title="Photos">
         <div className="grid grid-cols-2 gap-3">
+          <div><b className="text-sm">Photo on the envelope card</b><Photo round src={c.envelopePhoto} onChange={(p) => set('envelopePhoto', p)} onRemove={c.envelopePhoto ? () => set('envelopePhoto', '') : null} /></div>
           <div><b className="text-sm">Main photo</b><Photo round src={c.heroPhoto} onChange={(p) => set('heroPhoto', p)} /></div>
           <div><b className="text-sm">Background</b><Photo src={c.backgroundPhoto} onChange={(p) => set('backgroundPhoto', p)} /></div>
         </div>
