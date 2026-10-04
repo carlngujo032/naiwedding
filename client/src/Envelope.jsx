@@ -14,7 +14,11 @@ export default function Envelope({ name, onDone, onStart }) {
         <motion.div className="paper absolute inset-x-3 inset-y-2 z-[2] grid place-items-center rounded-[2px] shadow-md"
           animate={open ? { y: '-64%' } : {}} transition={{ delay: 0.9, duration: 1.2, ease: [0.3, 0.7, 0.2, 1] }}>
           <div className="flex h-[88%] w-[94%] flex-col items-center justify-center gap-2 border border-brass/60 text-center">
-            {cfg.envelopePhoto && <img src={cfg.envelopePhoto} alt="" className="h-[84px] w-[68px] rounded-t-full border-[3px] border-white object-cover shadow ring-1 ring-brass" />}
+            {cfg.envelopePhotos?.some(Boolean) && (
+              <div className="mb-1 flex items-end justify-center">
+                {cfg.envelopePhotos.map((src, i) => src && (
+                  <img key={i} src={src} alt="" className={`rounded-t-full border-[3px] border-white object-cover shadow-md ring-1 ring-brass ${i === 1 ? 'relative z-[2] h-[92px] w-[72px]' : `h-[74px] w-[58px] ${i === 0 ? '-mr-2 -rotate-[9deg]' : '-ml-2 rotate-[9deg]'}`}`} />))}
+              </div>)}
             <p className="m-0 font-serif text-sm italic text-ink/70">You are invited to the wedding of<br /><span className="font-script text-4xl not-italic text-ink">{cfg.partner1} &amp; {cfg.partner2}</span></p>
           </div>
         </motion.div>

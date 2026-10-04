@@ -25,7 +25,7 @@ export const defaults = {
   contacts: { coordinator: ['Coordinator Name', '0900 000 0000'], couple: [['Maria', '0900 000 0001'], ['Josh', '0900 000 0002']] },
   backgroundPhoto: '/photos/bg.jpg', // the picture behind the frosted-glass cards
   music: '/song.mp3', // optional: put an mp3 in client/public and set '/song.mp3'
-  envelopePhoto: '/photos/hero.jpg', // small photo on the card inside the envelope; empty = no photo
+  envelopePhotos: ['/photos/g1.jpg', '/photos/hero.jpg', '/photos/g2.jpg'], // photos on the envelope card: [left, centre, right]; leave a slot empty to skip it
   favicon: '', // browser tab icon: leave empty to use /favicon.svg, or set from /admin
   tabTitle: "You're invited", // text shown on the browser tab
   hidden: [], // built-in sections to hide: 'details','dress','story','entourage','gallery','faq'
